@@ -5,6 +5,10 @@ import pandas as pd
 
 conn = sqlite3.connect("negocio.db", check_same_thread=False)
 c = conn.cursor()
+def borrar_venta(venta_id):
+    c.execute("DELETE FROM ventas WHERE id = ?", (venta_id,))
+    conn.commit()
+
 
 c.execute("""
 CREATE TABLE IF NOT EXISTS productos (
@@ -78,8 +82,9 @@ elif menu == "Resumen diario":
 
     fecha = st.date_input("Selecciona una fecha", value=date.today())
 
-    query = f"""
-    SELECT v.producto,
+       query = f"""
+    SELECT v.id AS venta_id,
+           v.producto,
            v.cantidad,
            v.precio_venta,
            p.costo,
@@ -91,10 +96,25 @@ elif menu == "Resumen diario":
     WHERE v.fecha = '{fecha.isoformat()}'
     """
 
+
     df = pd.read_sql(query, conn)
 
-    if df.empty:
-        st.info("No hay ventas ese día")
-    else:
-        st.dataframe(df)
-        st.success(f"💰 Ganancia del día: ${df['ganancia'].sum():,.2f}")
+   if df.empty:
+    st.info("No hay ventas ese día")
+else:
+    st.dataframe(df, use_container_width=True)
+
+    st.success(f"💰 Ganancia del día: ${df['ganancia'].sum():,.2f}")
+
+    st.markdown("### 🗑️ Eliminar una venta")
+    venta_ids = df["venta_id"].tolist()
+    venta_seleccionada = st.selectbox(
+        "Selecciona la venta a eliminar",
+        venta_ids
+    )
+
+    if st.button("Eliminar venta seleccionada"):
+        borrar_venta(int(venta_seleccionada))
+        st.success("Venta eliminada correctamente")
+        st.rerun()
+
