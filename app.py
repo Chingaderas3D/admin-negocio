@@ -82,7 +82,7 @@ elif menu == "Resumen diario":
 
     fecha = st.date_input("Selecciona una fecha", value=date.today())
 
-       query = f"""
+    query = f"""
     SELECT v.id AS venta_id,
            v.producto,
            v.cantidad,
@@ -96,25 +96,23 @@ elif menu == "Resumen diario":
     WHERE v.fecha = '{fecha.isoformat()}'
     """
 
-
     df = pd.read_sql(query, conn)
 
-   if df.empty:
-    st.info("No hay ventas ese día")
-else:
-    st.dataframe(df, use_container_width=True)
+    if df.empty:
+        st.info("No hay ventas ese día")
+    else:
+        st.dataframe(df, use_container_width=True)
 
-    st.success(f"💰 Ganancia del día: ${df['ganancia'].sum():,.2f}")
+        st.success(f"💰 Ganancia del día: ${df['ganancia'].sum():,.2f}")
 
-    st.markdown("### 🗑️ Eliminar una venta")
-    venta_ids = df["venta_id"].tolist()
-    venta_seleccionada = st.selectbox(
-        "Selecciona la venta a eliminar",
-        venta_ids
-    )
+        st.markdown("### 🗑️ Eliminar una venta")
+        venta_ids = df["venta_id"].tolist()
+        venta_seleccionada = st.selectbox(
+            "Selecciona la venta a eliminar",
+            venta_ids
+        )
 
-    if st.button("Eliminar venta seleccionada"):
-        borrar_venta(int(venta_seleccionada))
-        st.success("Venta eliminada correctamente")
-        st.rerun()
-
+        if st.button("Eliminar venta seleccionada"):
+            borrar_venta(int(venta_seleccionada))
+            st.success("Venta eliminada correctamente")
+            st.rerun()
